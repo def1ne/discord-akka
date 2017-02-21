@@ -2,19 +2,21 @@ name := "discord-akka"
 
 version := "0.1.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.12.1"
 
-val libraryVersion = "1.2.0-M1" // or "1.3.0-SNAPSHOT"
+val monocleVersion = "1.4.0"
+val akkaVersion = "2.4.17"
+val akkaHttpVersion = "10.0.3"
 
 libraryDependencies := Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.3.2",
-  "com.typesafe.akka" %% "akka-http-experimental" % "1.0-SNAPSHOT",
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental" % "1.0-SNAPSHOT",
-  "com.github.julien-truffaut"  %%  "monocle-core"    % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-generic" % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-macro"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-state"   % libraryVersion,
-  "com.github.julien-truffaut"  %%  "monocle-law"     % libraryVersion % "test",
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.2" % "test",
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+  "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+  "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+  "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
+  "com.github.julien-truffaut"  %%  "monocle-core"    % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-generic" % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-macro"   % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-state"   % monocleVersion,
+  "com.github.julien-truffaut"  %%  "monocle-law"     % monocleVersion % "test",
+  "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )

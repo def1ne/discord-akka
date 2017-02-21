@@ -23,11 +23,11 @@ object Client {
   case class LoginFailure(resp: HttpResponse) extends Exception(resp.toString)
 }
 
-class Client(http: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), Unit])(implicit val system: ActorSystem, implicit val materializer: ActorMaterializer) {
+class Client(http: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), akka.NotUsed])(implicit val system: ActorSystem, implicit val materializer: ActorMaterializer) {
   import codec.DiscordProtocol._
   import system.dispatcher
 
-  def this()(implicit s: ActorSystem, m: ActorMaterializer) = this(Http().superPool())
+  def this()(implicit s: ActorSystem, m: ActorMaterializer) = this(Http().superPool[Int]())
 
   def acquireToken(email: String, password: String) = {
     val body = HttpEntity(ContentTypes.`application/json`, LoginInfo(email, password).toJson.compactPrint)
@@ -53,11 +53,11 @@ class Client(http: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), Unit])(imp
   }
 }
 
-class AuthenticatedClient(token: String, http: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), Unit])(implicit val system: ActorSystem, implicit val materializer: ActorMaterializer) {
+class AuthenticatedClient(token: String, http: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), akka.NotUsed])(implicit val system: ActorSystem, implicit val materializer: ActorMaterializer) {
   import system.dispatcher
   import codec.DiscordProtocol._
 
-  def this(token: String)(implicit s: ActorSystem, m: ActorMaterializer) = this(token, Http().superPool())
+  def this(token: String)(implicit s: ActorSystem, m: ActorMaterializer) = this(token, Http().superPool[Int]())
 
   private val authHeader = RawHeader("Authorization", token)
 
@@ -101,10 +101,10 @@ class AuthenticatedClient(token: String, http: Flow[(HttpRequest, Int), (Try[Htt
 
   def wsConnect(uri: Uri, listener: ActorRef) = {
     val sourceQueue = Source.queue[Message](64, OverflowStrategy.fail)
-    val destPublisher = Sink.publisher[Message]
+    val destPublisher = Sink.asPublisher[Message](fanout = false)
 
     val flow = Flow.fromSinkAndSourceMat(destPublisher, sourceQueue)(Keep.both)
-    val (_, (dest, source)) = Http().singleWebsocketRequest(uri, flow)
+    val (_, (dest, source)) = Http().singleWebSocketRequest(uri, flow)
 
     val props = ClientActor.props(source, listener, token)
     val actor = system.actorOf(props)

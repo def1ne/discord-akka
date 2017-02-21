@@ -1,18 +1,17 @@
 package com.tehasdf.discord
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{ContentTypes, StatusCodes, HttpResponse, HttpRequest}
+import akka.http.scaladsl.model.{ContentTypes, HttpRequest, HttpResponse, StatusCodes}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
 import akka.testkit.TestKit
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.{FlatSpecLike, BeforeAndAfterAll}
+import org.scalatest.{BeforeAndAfterAll, FlatSpecLike, Matchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.Success
 
-class ClientSpec(_sys: ActorSystem) extends TestKit(_sys) with FlatSpecLike with BeforeAndAfterAll with ShouldMatchers {
+class ClientSpec(_sys: ActorSystem) extends TestKit(_sys) with FlatSpecLike with BeforeAndAfterAll with Matchers {
   def this() = this(ActorSystem("discord-akka-test"))
 
   implicit val materializer = ActorMaterializer()

@@ -6,19 +6,19 @@ import akka.actor.{ActorRef, Cancellable, FSM, Props}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.stream.actor.ActorSubscriberMessage.OnNext
 import akka.stream.actor.{ActorSubscriber, OneByOneRequestStrategy}
-import akka.stream.scaladsl.Sink
-import akka.stream.{ActorMaterializer, SourceQueue}
+import akka.stream.scaladsl.{Sink, SourceQueue}
+import akka.stream.ActorMaterializer
 import codec.DiscordProtocol
 import com.tehasdf.discord.model._
 import com.tehasdf.discord.messages._
 import com.tehasdf.discord.state.GuildState
 import spray.json._
-
 import monocle.macros.GenLens
-import monocle.function.{index, at}
-import monocle.std._
+import monocle.function.At._
+import monocle.function.Index._
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 object Api {
   case object Ready
@@ -74,7 +74,7 @@ class ClientActor(client: SourceQueue[Message], listener: ActorRef, token: Strin
   client.offer(TextMessage(msg.toJson.prettyPrint))
 
   when(Init) {
-    case Event(OnNext(msg: TextMessage), Uninitialized) => {
+    case Event(OnNext(msg: TextMessage), Uninitialized) =>
       msg.textStream.runWith(Sink.fold("")(_ + _)).foreach { payload =>
         val m = payload.parseJson.convertTo[ServerMsg]
         m.`type` match {
@@ -86,7 +86,6 @@ class ClientActor(client: SourceQueue[Message], listener: ActorRef, token: Strin
         }
       }
       stay
-    }
     case Event(s: GoToConnected, Uninitialized) =>
       val cancellable = system.scheduler.schedule(0 seconds, s.heartbeat seconds, self, SendHeartbeat)
 
@@ -136,7 +135,7 @@ class ClientActor(client: SourceQueue[Message], listener: ActorRef, token: Strin
     case Event(UpdatePresence(newSeq, p), s: ConnectionState) =>
       import ConnectionState.Optics._
       import GuildState.Optics._
-      val presenceLens = guilds composeOptional(index(p.guildId)) composeLens(presences) composeLens(at(p.user.id))
+      val presenceLens = guilds composeOptional index(p.guildId) composeLens presences composeLens at(p.user.id)
       val newPresence = Presence(gameId = p.gameId, status = p.status, user = p.user.id)
 
       val newState = presenceLens.getOption(s).flatten match {
@@ -155,7 +154,7 @@ class ClientActor(client: SourceQueue[Message], listener: ActorRef, token: Strin
     case Event(AddMembership(p), s: ConnectionState) =>
       import ConnectionState.Optics._
       import GuildState.Optics._
-      val lens = guilds composeOptional(index(p.guildId)) composeLens(members) composeLens(at(p.user.id))
+      val lens = guilds composeOptional index(p.guildId) composeLens members composeLens at(p.user.id)
       val newMembership = Membership(deaf=false, joinedAt = p.joinedAt, mute=false, roles=p.roles, user=p.user)
       val newState = lens.set(Some(newMembership))(s)
       stay using newState

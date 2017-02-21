@@ -1,23 +1,22 @@
 package com.tehasdf.discord
 
-import akka.actor.{ActorRef, Actor, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
 import akka.pattern.ask
-import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.stream.{SourceQueue, ActorMaterializer, OverflowStrategy}
+import akka.stream.scaladsl.{Keep, Sink, Source, SourceQueue}
+import akka.stream.{ActorMaterializer, OverflowStrategy}
 import akka.testkit.TestKit
 import akka.util.Timeout
-import org.scalatest.concurrent.{IntegrationPatience, Eventually}
-
-import scala.collection.immutable
-import scala.concurrent.{Future, Await}
-import scala.concurrent.duration._
-
 import com.tehasdf.discord.ClientActor.ConnectionState
 import org.scalatest._
+import org.scalatest.concurrent.Eventually
+
+import scala.collection.immutable
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class ClientActorSpec(_sys: ActorSystem) extends TestKit(_sys)
-  with FlatSpecLike with BeforeAndAfterAll with ShouldMatchers with Eventually {
+  with FlatSpecLike with BeforeAndAfterAll with Matchers with Eventually {
   implicit val materializer = ActorMaterializer()
   implicit val iTimeout = Timeout(5 seconds)
   val defaultTimeout = 5 seconds
